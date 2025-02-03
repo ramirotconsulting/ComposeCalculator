@@ -1,15 +1,20 @@
-package com.creators.comoposecalculator
+package com.creators.core.domain
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class CalculatorViewModel: ViewModel() {
+@HiltViewModel
+class CalculatorViewModel@Inject constructor(
+    //private val repository: CalculatorRepository
+): ViewModel() {
     /*
     Write the string extension in a Util file
     Decouple the viewmodel from the screen ui composable
      */
-    var state by mutableStateOf(CalculatorState())
+    var state by mutableStateOf(com.creators.core.domain.CalculatorState())
         private set
 
     fun onNumberPressed(number: String) {
@@ -69,7 +74,7 @@ class CalculatorViewModel: ViewModel() {
     }
 
     fun onClearPressed() {
-        state = CalculatorState()
+        state = com.creators.core.domain.CalculatorState()
     }
 
     private fun computeResult(

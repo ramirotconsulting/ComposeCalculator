@@ -1,4 +1,4 @@
-package com.creators.comoposecalculator
+package com.creators.core.domain
 
 data class CalculatorState(
     val currentInput: String = "0",

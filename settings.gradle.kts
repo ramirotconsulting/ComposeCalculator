@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "comopose calculator"
 include(":app")
- 
+include(":core")
+include(":calculator")
