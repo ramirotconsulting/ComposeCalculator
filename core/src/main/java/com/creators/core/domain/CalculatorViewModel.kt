@@ -1,15 +1,51 @@
 package com.creators.core.domain
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.creators.core.domain.repository.CalculationRepository
+import com.creators.core.work.CalculatorWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import java.util.UUID
+import androidx.work.workDataOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class CalculatorViewModel@Inject constructor(
-    //private val repository: CalculatorRepository
+    private val workManager: WorkManager,
+    private val calculationRepository: CalculationRepository
 ): ViewModel() {
+
+    // Add this state holder
+    private val _workStatus = MutableStateFlow<WorkInfo?>(null)
+    val workStatus: StateFlow<WorkInfo?> = _workStatus.asStateFlow()
+
+    // Modify the observer
+    fun trackWorkStatus(workId: UUID) {
+        workManager.getWorkInfoByIdLiveData(workId).observeForever { workInfo ->
+            _workStatus.value = workInfo
+            when (workInfo?.state) {
+                WorkInfo.State.ENQUEUED -> Log.d("WORKER", "Work enqueued")
+                WorkInfo.State.RUNNING -> Log.d("WORKER", "Work running")
+                WorkInfo.State.SUCCEEDED -> Log.d("WORKER", "Work succeeded")
+                WorkInfo.State.FAILED -> Log.d("WORKER", "Work failed")
+                WorkInfo.State.BLOCKED -> Log.d("WORKER", "Work blocked")
+                WorkInfo.State.CANCELLED -> Log.d("WORKER", "Work cancelled")
+                null -> Log.d("WORKER", "Null")
+            }
+        }
+    }
     /*
     Write the string extension in a Util file
     Decouple the viewmodel from the screen ui composable
@@ -102,6 +138,41 @@ class CalculatorViewModel@Inject constructor(
             replace("\\.0+$", "").replace("0+$", "")
         } else {
             this
+        }
+    }
+
+    // Update schedule function
+    fun scheduleCalculationBackup(calculation: String) {
+        val workRequest = OneTimeWorkRequestBuilder<CalculatorWorker>()
+            .setInputData(workDataOf(CalculatorWorker.KEY_CALCULATION to calculation))
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.NOT_REQUIRED).build())
+            .build()
+
+        workManager.enqueue(workRequest)
+        trackWorkStatus(workRequest.id) // Track the new work
+    }
+
+    fun saveCalculation(result: String) {
+        viewModelScope.launch {
+            try {
+                // Save to local database
+                calculationRepository.saveCalculation(result)
+
+                // Schedule backup
+                scheduleCalculationBackup("$result")
+
+                Log.d("ViewModel", "Calculation saved successfully")
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error saving calculation", e)
+            }
+        }
+    }
+
+    fun logCalculations() {
+        viewModelScope.launch {
+            calculationRepository.getCalculationHistory().forEach {
+                Log.d("DB", "Calculation: $it")
+            }
         }
     }
 }

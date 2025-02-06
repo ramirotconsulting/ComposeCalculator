@@ -16,18 +16,24 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.work.WorkInfo
 import com.creators.core.domain.CalculatorViewModel
 
 
 @Preview(showBackground = true)
 @Composable
-fun CalculatorScreenPreview(){
+ fun CalculatorScreenPreview(){
     CalculatorScreen()
 }
 
@@ -36,6 +42,19 @@ fun CalculatorScreen(
     viewModel: CalculatorViewModel = hiltViewModel() // If using Hilt
 ) {
     val state = viewModel.state
+    // Collect work status from ViewModel
+    val workStatus by viewModel.workStatus.collectAsState()
+
+    // Show status in UI
+    workStatus?.let { status ->
+        when (status.state) {
+            WorkInfo.State.ENQUEUED -> StatusMessage("Calculation queued for backup")
+            WorkInfo.State.RUNNING -> StatusMessage("Backing up calculation...")
+            WorkInfo.State.SUCCEEDED -> StatusMessage("Backup successful!")
+            WorkInfo.State.FAILED -> StatusMessage("Backup failed. Check logs")
+            else -> {}
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -103,6 +122,13 @@ fun CalculatorScreen(
                 ) { viewModel.onDecimalPressed() }
 
                 Spacer(Modifier.weight(1f))
+                // In CalculatorScreen composable
+                Button(onClick = {
+                    viewModel.saveCalculation(state.currentInput)
+                    //viewModel.observeWorkStatus()
+                }) {
+                    Text("Save Calculation")
+                }
             }
         }
     }
@@ -140,4 +166,14 @@ private fun CalculatorButton(
             style = MaterialTheme.typography.headlineMedium
         )
     }
+}
+
+@Composable
+fun StatusMessage(text: String) {
+    Text(
+        text = text,
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(16.dp)
+    )
 }
