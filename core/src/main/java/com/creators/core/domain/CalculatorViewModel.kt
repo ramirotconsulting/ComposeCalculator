@@ -144,17 +144,17 @@ class CalculatorViewModel @Inject constructor(
 
     // Update schedule function
     fun scheduleCalculationBackup(calculation: String) {
-//        val workRequest = OneTimeWorkRequestBuilder<CalculatorWorker>()
-//            //.setInputData(workDataOf(CalculatorWorker.KEY_CALCULATION to calculation))
-//            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.NOT_REQUIRED).build())
-//            .build()
-        val inputData = Data.Builder()
-            .putLong(CalculatorWorker.KEY_DURATION_SECONDS, 10L)
-            .build()
-
         val workRequest = OneTimeWorkRequestBuilder<CalculatorWorker>()
-            .setInputData(inputData)
+            .setInputData(workDataOf(CalculatorWorker.KEY_CALCULATION to calculation))
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.NOT_REQUIRED).build())
             .build()
+//        val inputData = Data.Builder()
+//            .putLong(CalculatorWorker.KEY_DURATION_SECONDS, 10L)
+//            .build()
+//
+//        val workRequest = OneTimeWorkRequestBuilder<CalculatorWorker>()
+//            .setInputData(inputData)
+//            .build()
 
         workManager.enqueue(workRequest)
         trackWorkStatus(workRequest.id) // Track the new work
@@ -167,9 +167,10 @@ class CalculatorViewModel @Inject constructor(
                 calculationRepository.saveCalculation(result)
 
                 // Schedule backup
-                scheduleCalculationBackup("$result")
+                scheduleCalculationBackup("Backup: $result")
 
                 Log.d("ViewModel", "Calculation saved successfully")
+                logCalculations()
             } catch (e: Exception) {
                 Log.e("ViewModel", "Error saving calculation", e)
             }
