@@ -13,17 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ComoposeCalculator"
         tools:targetApi="31">
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.ComoposeCalculator">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx.startup"
@@ -39,6 +28,21 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.ComoposeCalculator">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <meta-data
+            android:name="androidx.work.WorkManagerInitializer"
+            android:value="DISABLED" />
+
     </application>
 
 </manifest>

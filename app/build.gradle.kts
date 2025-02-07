@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.dagger.hilt.android") // Add this
     id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -61,17 +61,23 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    kapt("com.google.dagger:hilt-android-compiler:2.48")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    //kapt("com.google.dagger:hilt-android-compiler:2.48")
+    //implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     implementation (libs.androidx.lifecycle.viewmodel.compose)
-    // WorkManager
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
-    implementation("androidx.hilt:hilt-work:1.1.0")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
+    // Hilt for Android and assisted injection
+    implementation ("com.google.dagger:hilt-android:2.54")
+    kapt ("com.google.dagger:hilt-compiler:2.54")
 
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
+    // Hilt WorkManager integration
+    implementation ("androidx.hilt:hilt-work:1.2.0")
+    kapt ("androidx.hilt:hilt-compiler:1.2.0")
+
+    // WorkManager runtime (if needed)
+    implementation ("androidx.work:work-runtime-ktx:2.8.1")
+
+    // WorkManager runtime (if needed)
+    implementation ("androidx.work:work-runtime-ktx:2.8.1")
 
 
     // Room (if using database)

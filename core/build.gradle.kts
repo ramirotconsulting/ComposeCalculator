@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.kapt") // Add this
-    id("com.google.dagger.hilt.android") // Hilt plugin if containing ViewModels
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -47,14 +47,16 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation("androidx.compose.material3:material3:1.3.1")
-    // Hilt
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
-    // Hilt Navigation
-    implementation(libs.androidx.hilt.navigation.compose.v100)
-    // Hilt Testing
-    androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.android.compiler.v248)
+    // Hilt for Android and assisted injection
+    implementation ("com.google.dagger:hilt-android:2.54")
+    kapt ("com.google.dagger:hilt-compiler:2.54")
+
+    // Hilt WorkManager integration
+    implementation ("androidx.hilt:hilt-work:1.2.0")
+    kapt ("androidx.hilt:hilt-compiler:1.2.0")
+
+    // WorkManager runtime (if needed)
+    implementation ("androidx.work:work-runtime-ktx:2.8.1")
     //room
     implementation(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)

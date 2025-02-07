@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
+import androidx.work.Data
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
@@ -22,7 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class CalculatorViewModel@Inject constructor(
+class CalculatorViewModel @Inject constructor(
     private val workManager: WorkManager,
     private val calculationRepository: CalculationRepository
 ): ViewModel() {
@@ -143,9 +144,16 @@ class CalculatorViewModel@Inject constructor(
 
     // Update schedule function
     fun scheduleCalculationBackup(calculation: String) {
+//        val workRequest = OneTimeWorkRequestBuilder<CalculatorWorker>()
+//            //.setInputData(workDataOf(CalculatorWorker.KEY_CALCULATION to calculation))
+//            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.NOT_REQUIRED).build())
+//            .build()
+        val inputData = Data.Builder()
+            .putLong(CalculatorWorker.KEY_DURATION_SECONDS, 10L)
+            .build()
+
         val workRequest = OneTimeWorkRequestBuilder<CalculatorWorker>()
-            .setInputData(workDataOf(CalculatorWorker.KEY_CALCULATION to calculation))
-            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.NOT_REQUIRED).build())
+            .setInputData(inputData)
             .build()
 
         workManager.enqueue(workRequest)
